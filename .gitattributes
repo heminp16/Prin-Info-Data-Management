@@ -1,2 +1,2 @@
-*.rtf linguist-detectable=SQL
+*.rtf linguist-detectable=false
 # *.sql linguist-language=SQL
