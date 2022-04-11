@@ -1,0 +1,254 @@
+
+Hemin Patel - HW 2
+
+SUBMISSION INSTRUCTIONS
+
+There can be many ways to submit. We will accept any (as long as we can read it)
+
+Best would be ONE txt file  (Notepad) with 
+
+query #
+sql query
+followed by result which you got from practice database
+in txt
+
+--------------------------------------------------------------------------------------------
+LIST OF QUERIES:
+________________
+
+1. Beers which are not served by Gecko Grill bar
+	
+	Select beer from Sells where bar <> "Gecko Grill" and beer != "Hefeweizen" and beer != "Budweiser" Group by beer
+
+	'Hefeweizen Doppelbock'
+	'Original Premium Lager Dog'
+	'Killian\'s'
+	'Stolichnaya Citrona'
+	'Michelob Amber Bock'
+	'Bud'
+
+--------------------------------------------------------------------------------------------
+2. Drinkers who like all beers which Justin likes
+
+	Select distinct drinker from Likes l, (select beer from Likes l where l.drinker = "Justin") ppl where l.beer = ppl.beer and l.drinker != "Justin"
+
+	'John'
+	'Mike'
+
+--------------------------------------------------------------------------------------------
+3. Pairs of drinkers and bars such that a drinker frequents the bar and the bar serves no beer which the drinker likes 
+
+	select distinct f.drinker, f.bar from Frequents f where f.drinker in (select distinct d.drinker from Frequents d where not exists (select * from Sells s, Likes l where d.bar= s.bar and d.drinker= l.drinker AND s.beer = l.beer));
+
+	'Bob', 'Blue Angel'
+	'Erik', 'Blue Angel'
+	'Herb', 'Blue Angel'
+	'Joe', 'Blue Angel'
+	'John', 'Blue Angel'
+	'Justin', 'Blue Angel'
+	'Rebecca', 'Blue Angel'
+	'Tom', 'Blue Angel'
+	'Vince', 'Blue Angel'
+	'John', 'Cabana'
+	'Vince', 'Cabana'
+	'Joe', 'Caravan'
+	'John', 'Caravan'
+	'Tom', 'Caravan'
+	'Bob', 'Coconut Willie\'s Cocktail Lounge'
+	'Joe', 'Coconut Willie\'s Cocktail Lounge'
+	'Rebecca', 'Coconut Willie\'s Cocktail Lounge'
+	'Justin', 'Gecko Grill'
+	'Rebecca', 'Gecko Grill'
+	'Herb', 'Seven Bamboo'
+	'Vince', 'Seven Bamboo'
+	'Justin', 'Caravan'
+	'Justin', 'Seven Bamboo'
+	'Bob', 'The Blank Club'
+	'Vince', 'Club 175'
+	'Joe', 'Britannia Arms'
+	'Tom', 'Giza Hookah Lounge'
+
+--------------------------------------------------------------------------------------------
+4. Bars which are frequented by neither Justin nor Rebecca 
+
+	select distinct bar from Frequents where drinker != "Justin" and drinker != "Rebecca"
+
+	'A.P. Stump\'s'
+	'Blue Angel'
+	'Cabana'
+	'Caravan'
+	'Coconut Willie\'s Cocktail Lounge'
+	'Seven Bamboo'
+	'The Shark and Rose'
+	'The Blank Club'
+	'Club 175'
+	'Britannia Arms'
+	'Giza Hookah Lounge'
+
+--------------------------------------------------------------------------------------------
+5. Drinkers who frequent only these bars which sell beers that they like
+
+	select distinct f.drinker from Frequents f where f.drinker in (select distinct d.drinker from Frequents d where  exists (select * from Sells s, Likes l where d.bar=s.bar and d.drinker=l.drinker and s.beer = l.beer))
+
+	'Mike'
+	'Jesse'
+	'John'
+	'Justin'
+
+--------------------------------------------------------------------------------------------
+6. Bars which serve no beer cheaper than $5
+
+	Select bar from Sells Group by bar having MIN(price)>=5
+
+	'A.P. Stump\'s'
+	'Blue Angel'
+	'Blue Tattoo'
+	'Britannia Arms'
+	'Cabana'
+	'Hedley Club'
+	'The B-Hive'
+	'The Blank Club'
+	
+--------------------------------------------------------------------------------------------
+7. What is the bar with the highest average price of beer that it sells
+
+	Select bar, Round(AVG(price),3) from Sells Group by bar Order by AVG(price) desc LIMIT 1;
+
+
+	'Hedley Club', '6.750'
+
+--------------------------------------------------------------------------------------------
+8. Order all bars by the average price of beer that they sell (in descending order)
+
+	Select bar, Round(AVG(price),3) from Sells Group by bar Order by AVG(price) desc;
+
+	'Hedley Club', '6.750'
+	'Britannia Arms', '6.500'
+	'A.P. Stump\'s', '6.000'
+	'Blue Tattoo', '6.000'
+	'Blue Angel', '5.875'
+	'The Blank Club', '5.500'
+	'Cabana', '5.000'
+	'The B-Hive', '5.000'
+	'The Shark and Rose', '5.000'
+	'Giza Hookah Lounge', '4.625'
+	'Caravan', '4.500'
+	'Club 175', '4.500'
+	'Eulipia', '4.500'
+	'Gecko Grill', '4.500'
+	'The Backbeat', '3.500'
+	'Coconut Willie\'s Cocktail Lounge', '3.250'
+	'Seven Bamboo', '2.500'
+
+--------------------------------------------------------------------------------------------
+9. Find all bars whose names consist of more than one word
+
+	Select name from Bars where name Like "% %"
+
+	'A.P. Stump\'s'
+	'Blue Angel'
+	'Blue Tattoo'
+	'Britannia Arms'
+	'Club 175'
+	'Coconut Willie\'s Cocktail Lounge'
+	'Gecko Grill'
+	'Giza Hookah Lounge'
+	'Hedley Club'
+	'Il Fornaio'
+	'Seven Bamboo'
+	'The B-Hive'
+	'The Backbeat'
+	'The Blank Club'
+	'The Shark and Rose'
+
+--------------------------------------------------------------------------------------------
+10. Which drinker(s) like the most beers
+
+	Select drinker From Likes
+	Group by drinker 
+	HAVING COUNT(drinker)>1
+	Order by COUNT(drinker) desc LIMIT 1;
+
+	'Mike'
+
+--------------------------------------------------------------------------------------------
+11. Which beer has the highest average price over all bars
+
+	Select beer from Sells Group by beer HAVING AVG(price) >= ALL ( SELECT AVG(price)) Order by AVG(price) desc LIMIT 1;
+
+	'Hefeweizen'
+
+--------------------------------------------------------------------------------------------
+12. Find bar(s) which charge the smallest price for Budweiser (Bud)
+
+	Select bar 
+	From Sells where beer= "Budweiser"
+	Group by bar
+	Having Min(price)
+	Order by MIN(price) Limit 1;
+
+	'Seven Bamboo'
+
+
+--------------------------------------------------------------------------------------------
+13. Using outer join (left/right - your choice) Find drinkers who do not frequent any bar which sells Budweiser
+
+	Select distinct f.drinker from Frequents f Left Join Sells s on f.bar = s.bar and s.beer <> "Budweiser"
+
+	'Mike'
+	'Bob'
+	'Erik'
+	'Herb'
+	'Jesse'
+	'Joe'
+	'John'
+	'Justin'
+	'Rebecca'
+	'Tom'
+	'Vince'
+
+--------------------------------------------------------------------------------------------
+14. Using outerjoin find a beer which is not sold by any bar which Mike frequents
+
+	Select distinct name as beer_name from Beers B
+	left outer join
+	(Select S.bar as bar, S.beer as beer from Sells S join Frequents F ON (S.bar=F.bar) where F.drinker= "Mike") 
+	S1 ON (B.name=S1.beer) where S1.beer is null;
+
+
+	'Blue Moon'
+	'Bud'
+	'Creamy Dark'
+	'Extra Gold'
+	'ICEHOUSE'
+	'Killian\'s'
+	'Michelob Amber Bock'
+	'Michelob Golden Draft'
+	'Michelob Golden Draft Light'
+	'Michelob ULTRA'
+	'Original Premium'
+	'Original Premium Lager'
+	'Sauza Diablo'
+	'Southpaw Light'
+	'Stolichnaya Citrona'
+	'Zima'
+	'Zima Citrus'
+
+
+
+--------------------------------------------------------------------------------------------
+15. Write a query which returns "Yes" if there is any beer which all drinkers like, and "No" otherwise.
+
+	select distinct 'Yes' as 'nonempty'  from Sells where EXISTS(select * from Sells) UNION select distinct 'No' as 'nonempty'  from Sells where NOT EXISTS(select * from Sells);
+
+// Could not connect to SQL Workshop 
+
+--------------------------------------------------------------------------------------------
+16. Write a query like the one above which either returns such a beer, or if there is no such beer, returns "No such a beer exists".
+
+	select distinct beer from Sells where EXISTS(select * from Sells where beer='Budweiser') UNION select 'No such beer exists' as beer  from Sells where  NOT EXISTS(select * from Sells where beer='Budweiser')
+
+
+// Could not connect to SQL Workshop
+
+--------------------------------------------------------------------------------------------

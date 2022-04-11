@@ -1,0 +1,92 @@
+
+Hemin Patel - HW 1
+
+
+
+Assignment:
+
+Write SQL queries for each of the 8 queries below and execute them on the database instance  provided in our BarBeerDrinker database (instructions how to connect and download SQL query workbench in the document posted in resources)
+
+Submission Instruction:   Text file showing
+
+a) Each query (8)
+b) the results returned  by the practice database Bar-Beer-Drinker Instance(8)
+
+
+--------------------------------------------------------------------------------------------
+LIST OF QUERIES:
+________________
+
+1. Beers other than Hefeweizen which are served by Gecko Grill bar
+
+	Select * from Sells where bar = "Gecko Grill" and beer != "Hefeweizen";
+	
+	'Gecko Grill', 'Budweiser', '3.00'
+--------------------------------------------------------------------------------------------
+2. Drinkers  who like some beers which Justin also likes
+
+	Select distinct drinker from Likes l, (select beer from Likes l where l.drinker = "Justin") ppl where l.beer = ppl.beer and l.drinker != "Justin"
+
+	'John'
+	'Mike'
+--------------------------------------------------------------------------------------------
+3. Pairs of drinkers and bars such that a drinker frequents the bar and the bar serves at least one beer which the drinker likes
+
+	select distinct f.drinker, f.bar from Frequents f where f.bar in (select distinct s.bar from Sells s where s.beer in (select distinct l.beer from Likes l where l.drinker = f.drinker))
+
+	'Mike', 'A.P. Stump\'s'
+	'Jesse', 'Blue Angel'
+	'Mike', 'Blue Angel'
+	'John', 'Cabana'
+	'Mike', 'Cabana'
+	'John', 'Caravan'
+	'Justin', 'Gecko Grill'
+	'Mike', 'The Shark and Rose'
+	'Justin', 'Caravan'
+	'Justin', 'Seven Bamboo'
+--------------------------------------------------------------------------------------------
+4. Bars which are frequented by Justin or Rebecca but not by both of them
+
+	select bar from Frequents where drinker = "Justin" or drinker = "Rebecca" Group by bar HAVING COUNT(*) < 2
+
+	'Coconut Willie\'s Cocktail Lounge'
+	'Caravan'
+	'Seven Bamboo'
+--------------------------------------------------------------------------------------------
+5. Drinkers who frequent bars which sell some beer that they like
+	
+	select distinct f.drinker from Frequents f where f.bar in (select distinct s.bar from Sells s where s.beer in (select distinct l.beer from Likes l where l.drinker = f.drinker))
+
+	'Mike'
+	'Jesse'
+	'John'
+	'Justin'
+--------------------------------------------------------------------------------------------
+6. Bars which serve some beers which John or Rebecca like and which are cheaper than $5
+	Select bar from (select price, bar from (select l.beer from Likes l where l.drinker = "John" or l.drinker= "Rebecca") couple, Sells where Sells.beer = couple.beer)
+	fprice where fprice.price <5;
+
+	'Club 175'
+	'Coconut Willie\'s Cocktail Lounge'
+	'Gecko Grill'
+	'Giza Hookah Lounge'
+	'Seven Bamboo'
+	'The Backbeat'
+	'The Shark and Rose'
+--------------------------------------------------------------------------------------------
+7. Drinkers who like both Hefeweizen and Killian's
+
+	select drinker from Likes where beer = "Hefeweizen" or beer= "Killian's" Group by drinker HAVING COUNT(*) > 1
+
+	'Mike'
+--------------------------------------------------------------------------------------------
+8. Bars with names containing "The"
+
+	select * from Bars where name like '%The%'
+
+	'The B-Hive', 'MA12348', 'Boston', '345-567-1280', NULL
+	'The Backbeat', 'CA45678', 'San Francisco', '415-567-1289', NULL
+	'The Blank Club', 'MA12349', 'Boston', '345-567-1281', NULL
+	'The Shark and Rose', 'MA12345', 'Boston', NULL, NULL
+--------------------------------------------------------------------------------------------
+

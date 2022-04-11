@@ -1,0 +1,254 @@
+
+
+Hemin Patel - HW3
+
+
+The table Penna_fully_sorted in BarBeerDrinker database contains results of last presidential election in precincts around Philadelphia. 
+
+
+It shows 217 timestamps from 3110 precincts starting from  
+2020-11-03 19:39:48  to 2020-11-11 21:50:46 for Biden and Trump. For each timestamp the table shows total votes UNTIL that timestamp and as well as their split for Biden and for Trump.
+
+Yes, it has content!  Just order by descending Timestamps and you will see it.
+
+We assume that the final totals for each precinct are recorded at the latest timestamp recorded for the precinct.
+
+You can notice that precincts are of different types, some of them have word Township in them, other have "Borough" or "Ward".
+
+--------------------------------------------------------------------------------------------
+
+READ before you ask: 
+
+Total vote for a candidate at timestamp t is sum of all votes from all precincts for this candidate at timestamp t. 
+
+Total vote between timestamps t and timestamp s is sum of total votes at timestamps between t and s. 
+
+Total final vote for subset of precincts - is the sum of final total votes for all precincts in this subset (say "Township"). Precinct total vote at timestamp t is ALL the votes counted at this precinct till time t. That is, it is cumulative.   
+
+Write the following queries and show the results which you got. Submission instructions are the same as for previous HWs
+
+
+
+--------------------------------------------------------------------------------------------
+1) What was the earliest timestamp when Biden was leading Trump overall by more than 100000 votes? (i.e. in all precincts)
+
+Select Min(Timestamp) as MinTimestamp
+From Penna
+Group by Timestamp
+Having (sum(Biden) - sum(Trump) >=100000) Limit 1
+
+
+'2020-11-04 08:31:05'
+
+--------------------------------------------------------------------------------------------
+2) Show the earliest timestamp t when first vote was casted. Return also all precincts which got their first vote counted at t. 
+
+Select Timestamp, precinct from Penna P where (P.precinct, P.Timestamp) in (select precinct, Timestamp from Penna group by precinct) and totalvotes > 0
+Order by Timestamp LIMIT 86;
+
+
+'2020-11-04 01:11:32', 'BELLEFONTE NORTH'
+'2020-11-04 01:11:32', 'BELLEFONTE NORTHEAST'
+'2020-11-04 01:11:32', 'BELLEFONTE SOUTH'
+'2020-11-04 01:11:32', 'BELLEFONTE SOUTHEAST'
+'2020-11-04 01:11:32', 'BELLEFONTE WEST'
+'2020-11-04 01:11:32', 'BENNER NORTH'
+'2020-11-04 01:11:32', 'BENNER SOUTH'
+'2020-11-04 01:11:32', 'BOGGS EAST'
+'2020-11-04 01:11:32', 'BOGGS WEST'
+'2020-11-04 01:11:32', 'BURNSIDE'
+'2020-11-04 01:11:32', 'CENTRE HALL'
+'2020-11-04 01:11:32', 'COLLEGE EAST'
+'2020-11-04 01:11:32', 'COLLEGE NORTH'
+'2020-11-04 01:11:32', 'COLLEGE SOUTH'
+'2020-11-04 01:11:32', 'COLLEGE WEST'
+'2020-11-04 01:11:32', 'CURTIN SOUTH'
+'2020-11-04 01:11:32', 'FERGUSON EAST'
+'2020-11-04 01:11:32', 'FERGUSON NORTH 1'
+'2020-11-04 01:11:32', 'FERGUSON NORTH 2'
+'2020-11-04 01:11:32', 'FERGUSON NORTH 3'
+'2020-11-04 01:11:32', 'FERGUSON NORTH CENTRAL'
+'2020-11-04 01:11:32', 'FERGUSON NORTHEAST 1 (49-1)'
+'2020-11-04 01:11:32', 'FERGUSON NORTHEAST 2'
+'2020-11-04 01:11:32', 'FERGUSON WEST'
+'2020-11-04 01:11:32', 'FERGUSON WEST CENTRAL'
+...And more
+
+--------------------------------------------------------------------------------------------
+
+3) Which precinct(s) showed smallest *final* vote difference between Biden and Trump. 
+
+Select precinct
+from Penna 
+where Timestamp in (select max(Timestamp) from Penna) AND Biden = Trump and ABS(Biden=Trump) 
+
+
+'LOWER SWATARA TWP--3RD PRECINCT'
+'Pottstown 7-2'
+
+--------------------------------------------------------------------------------------------
+
+
+4) At which timestamp the difference between total vote for Biden and total vote for Trump was the largest
+
+Select Timestamp
+From  Penna
+Group by Timestamp
+Order by abs(sum(Biden)-sum(Trump)) desc
+limit 2
+
+2020-11-10 21:45:52
+2020-11-10 21:30:56
+
+
+--------------------------------------------------------------------------------------------
+
+5) List all timestamps t, total vote for Trump and total vote for Biden such  that total vote for Trump was larger than total vote for Biden at t.
+
+Select Timestamp, Sum(Trump), Sum(Biden)
+From Penna
+Group by Timestamp
+Having (sum(Trump) > Sum(Biden))
+
+
+// For this answer, the main server and local server gave me different results for some reason. 
+
+Main Server: 0 rows returned 
+
+Local Server: '2020-11-04 03:17:45', '54301', '51203'
+
+--------------------------------------------------------------------------------------------
+
+6) Who won all Township precincts, who won all Borough precincts? Who won all the Wards?  In all three cases show how many votes both candidates recieved in all such precincts as well
+
+Select precinct, Sum(Trump), Sum(Biden)
+from testDB.penna where precinct Like "%Township%"
+Group by precinct
+Order by MAX(totalvotes) desc
+
+Select precinct, Sum(Trump), Sum(Biden)
+from testDB.penna where precinct Like "%Borough%"
+Group by precinct
+Order by MAX(totalvotes) desc
+
+Select precinct, Sum(Trump), Sum(Biden)
+from testDB.penna where precinct Like "%Ward%"
+Group by precinct
+Order by MAX(totalvotes) desc
+
+
+'EAST HANOVER TOWNSHIP--1ST PRECINCT', '14433', '7572'
+'DERRY TOWNSHIP--15TH PRECINCT', '8133', '13260'
+'SWATARA TOWNSHIP--6TH PRECINCT', '6847', '12176'
+'SWATARA TOWNSHIP--7TH PRECINCT', '7533', '11031'
+'EAST HANOVER TOWNSHIP--2ND PRECINCT', '13413', '4903'
+'SWATARA TOWNSHIP--5TH PRECINCT', '7065', '10928'
+'SWATARA TOWNSHIP--8TH PRECINCT', '9081', '8112'
+'SWATARA TOWNSHIP--3RD PRECINCT', '5205', '11829'
+'DERRY TOWNSHIP--1ST PRECINCT', '6061', '9253'
+'DERRY TOWNSHIP--10TH PRECINCT', '7953', '6627'
+'Barr Township Voting Precinct', '21673', '3422'
+'SWATARA TOWNSHIP--10TH PRECINCT', '6252', '8055'
+'SWATARA TOWNSHIP--9TH PRECINCT', '5849', '8225'
+'DERRY TOWNSHIP--7TH PRECINCT', '7113', '6422'
+'JACKSON TOWNSHIP', '10001', '3330'
+.. And more
+
+
+'Marlborough','17415','10752'
+'360 E MARLBOROUGH W','9760','15170'
+'355 E MARLBOROUGH E','9328','12630'
+'Hatfield Borough','9386','12711'
+'356 E MARLBOROUGH S','7797','10837'
+'MILLERSBURG BOROUGH','10191','4065'
+'Westmont Borough No. 2 Voting Precinct','14240','7668'
+'Westmont Borough No. 3 Voting Precinct','13016','7093'
+'HIGHSPIRE BOROUGH','6180','7524'
+'Westmont Borough No. 1 Voting Precinct','11882','7297'
+'PAXTANG BOROUGH','3546','7326'
+'Southmont Borough No. 1 Voting Precinct','10214','5979'
+'Geistown Borough No. 2 Voting Precinct','12017','4123'
+'Gallitzin Borough Voting Precinct','11473','3539'
+'Ferndale Borough Voting Precinct','9664','4659'
+'Ebensburg Borough - West Voting Precinct','7349','4606'
+.. And more
+
+
+'SUSQUEHANNA TWP--2ND WARD','8400','14472'
+'SUSQUEHANNA TWP--8TH WARD','7627','14441'
+'SUSQUEHANNA TWP--9TH WARD','6861','15076'
+'SUSQUEHANNA TWP--3RD WARD','4652','15361'
+'SUSQUEHANNA TWP--1ST WARD','6629','12741'
+'SUSQUEHANNA TWP--7TH WARD','4689','14311'
+'Allentown 17th Ward 4th District Parkland','7448','11684'
+'SUSQUEHANNA TWP--6TH WARD','6580','11935'
+'Salisbury 2nd Ward','9974','9033'
+'SUSQUEHANNA TWP--4TH WARD','5142','11719'
+'SUSQUEHANNA TWP--5TH WARD','5889','10558'
+'Allentown 19th Ward 6th District','5558','11173'
+'Salisbury 1st Ward','8468','8080'
+'Allentown 16th Ward 2nd District','6169','9667'
+'Bethlehem 13th Ward 1st District','5138','9609'
+'Salisbury 5th Ward 2nd District','7036','6502'
+.. And more
+
+--------------------------------------------------------------------------------------------
+
+7) Write a query returning the name and number of votes of the candidate who won election according to all precincts in this database? Who won the first day?  Who won the last day? (had more votes gained just in the last day, Nov, 11)
+
+Select Sum(Trump), Sum(Biden)
+from Penna
+
+Select Min(Timestamp), Sum(Trump), Sum(Biden)
+From Penna
+
+Select Max(Timestamp), Sum(Trump), Sum(Biden)
+From Penna
+
+
+'104816735', '178853126'
+
+
+'2020-11-03 19:39:48', '104816735', '178853126'
+
+
+'2020-11-11 21:50:46', '104816735', '178853126'
+
+--------------------------------------------------------------------------------------------
+
+8) How many precincts did Trump win?
+
+Select COUNT(*) OVER () as precinct
+from Penna 
+Group by precinct
+Having Max(Trump) > Max(Biden) Limit 1
+
+
+
+// For this answer, the main server and local server gave me different results for some reason. 
+
+Main Server: 691
+
+Local Server: 692
+
+
+--------------------------------------------------------------------------------------------
+
+9)  Write an interesting query yourself - query which would show something surprising?
+
+Which county has the most precincts? 
+
+Select distinct locality as County, COUNT(precinct) as Amount
+from Penna
+Group by locality
+Having (COUNT(precinct))
+Order by Max(precinct) Limit 1
+
+'Philadelphia', '250340'
+
+
+--------------------------------------------------------------------------------------------
+
+
+
+
